@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <limits.h>
 #include <assert.h>
 
 struct isq {
@@ -126,6 +127,13 @@ static int sfmt(char **result, int key_1, const char *expansion_1, ...) {
    return v.failure;
 }
 
+/* Same as sfmt() but intended for multiple invocations reusing the same
+ * buffer. <buffer_ref> and <size_ref> are the variable which store the
+ * current buffer pointer and buffer allocation size. They must contain valid
+ * values, where a null pointer and a size size of zero are also valid,
+ * meaning no buffer has been allocated yet. The buffer will be deallocated in
+ * case of an error, using the pointer to specify the error message. The
+ * buffer size variable has no meaning in this case. */
 static int sfmtm(
    char **buffer_ref, size_t *size_ref, int key_1, const char *expansion_1, ...
 ) {
@@ -139,6 +147,14 @@ static int sfmtm(
    return v.failure;
 }
 
+#define UINT_BASE10_MAXCHARS(type_or_value) ( \
+   sizeof(type_or_value) * CHAR_BIT * 617 + 2047 >> 11 \
+)
+
+#define UINT_BASE10_BUFSIZE(type_or_value) ( \
+   UINT_BASE10_MAXCHARS(type_or_value) + 1 \
+)
+
 int main(void) {
    char *str= 0;
    char const *error= 0;
@@ -146,7 +162,7 @@ int main(void) {
       unsigned i;
       size_t len= 0;
       for (i= 1; i <= 10; ++i) {
-         char num[3];
+         char num[UINT_BASE10_BUFSIZE(unsigned)];
          if (sprintf(num, "%u", i) < 0) {
             error= "Internal error!";
             fail:
@@ -170,8 +186,9 @@ int main(void) {
    if (
       sfmt(
             &str
-         ,  'Y', "2001", 'M', "12", 'D', "24", 'w', "Santa Claus", 'm'
-         ,  "Ho Ho Ho", 0, "On %Y-%M-%D, %w said %m."
+         ,  'Y', "2001", 'M', "12", 'D', "24", 'w', "Santa Claus"
+         ,  'm', "Ho Ho Ho"
+         ,  0, "On %Y-%M-%D, %w said %m."
       )
    ) {
       goto fmt_error;
