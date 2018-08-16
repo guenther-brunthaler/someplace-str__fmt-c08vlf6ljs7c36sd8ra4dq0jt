@@ -76,16 +76,21 @@ int main(void) {
    if (
       !(
          str= sfmt(
-               'y', "2001", 'm', "12", 'd', "24", 'w', "Santa Claus", 'm'
-            ,  "Ho Ho Ho", 0, "On %y-%m-%d, %w said %m."
+               'Y', "2001", 'M', "12", 'D', "24", 'w', "Santa Claus", 'm'
+            ,  "Ho Ho Ho", 0, "On %Y-%M-%D, %w said %m."
          )
       )
    ) {
       error= "string formatting error!";
-   } else if (puts(str) < 0 || fflush(0)) error= "output error!";
-   if (error) {
+      fail:
       (void)fputs(error, stderr);
       (void)fputc('\n', stderr);
+      goto cleanup;
+   } else if (puts(str) < 0 || fflush(0)) {
+      error= "output error!";
+      goto fail;
    }
+   cleanup:
+   if (str) { free(str); str= 0; }
    return error ? EXIT_FAILURE : EXIT_SUCCESS;
 }
