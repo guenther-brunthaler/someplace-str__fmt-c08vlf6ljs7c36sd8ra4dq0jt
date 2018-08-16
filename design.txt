@@ -1,0 +1,22 @@
+String Formatter
+================
+
+The goal is to develop a string formatter with the least amount of portable implementation code.
+
+The formatter's basic job ist to expand insertion sequences in a format string like
+
+"On %y-%m-%d, %w said %m.\n"
+
+This is intended to be used for error string formatting and should work well with gettext(), i. e. the order in which the insertion sequences are defined shall have no relation with the order in which they appear in the format string.
+
+Also, it is allowed to provide more expansion strings than are actually referenced in the format string, and the same insertion marker may appear multiple times in the format string.
+
+int fmt('y', "2001", 'm', "12", 'd', "24", 'w', "Santa Claus", 'm', "Ho Ho Ho", 0, "On %y-%m-%d, %w said %m.\n", stdout);
+
+int sfmt('y', "2001", 'm', "12", 'd', "24", 'w', "Santa Claus", 'm', "Ho Ho Ho", 0, "On %y-%m-%d, %w said %m.\n", &buffer_ptr, &buffer_size);
+
+char *afmt('y', "2001", 'm', "12", 'd', "24", 'w', "Santa Claus", 'm', "Ho Ho Ho", 0, "On %y-%m-%d, %w said %m.\n");
+
+int cbfmt('y', "2001", 'm', "12", 'd', "24", 'w', "Santa Claus", 'm', "Ho Ho Ho", 0, "On %y-%m-%d, %w said %m.\n", &callback, relateddata...);
+
+int bfmt('y', "2001", 'm', "12", 'd', "24", 'w', "Santa Claus", 'm', "Ho Ho Ho", 0, "On %y-%m-%d, %w said %m.\n");
