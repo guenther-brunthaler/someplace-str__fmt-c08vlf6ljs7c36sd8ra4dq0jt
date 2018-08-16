@@ -140,8 +140,33 @@ static int sfmtm(
 }
 
 int main(void) {
-   char *str;
+   char *str= 0;
    char const *error= 0;
+   {
+      unsigned i;
+      size_t len= 0;
+      for (i= 1; i <= 10; ++i) {
+         char num[3];
+         if (sprintf(num, "%u", i) < 0) {
+            error= "Internal error!";
+            fail:
+            (void)fputs(error, stderr);
+            (void)fputc('\n', stderr);
+            goto cleanup;
+         }
+         if (sfmtm(&str, &len, 'n', num, 0, "The number is %n.")) {
+            fmt_error:
+            error= str; str= 0;
+            goto fail;
+         }
+         if (puts(str) < 0) {
+            output_error:
+            error= "output error!";
+            goto fail;
+         }
+      }
+      free(str); str= 0;
+   }
    if (
       sfmt(
             &str
@@ -149,33 +174,9 @@ int main(void) {
          ,  "Ho Ho Ho", 0, "On %Y-%M-%D, %w said %m."
       )
    ) {
-      fmt_error:
-      error= str; str= 0;
-      fail:
-      (void)fputs(error, stderr);
-      (void)fputc('\n', stderr);
-      goto cleanup;
+      goto fmt_error;
    }
-   if (puts(str) < 0) {
-      output_error:
-      error= "output error!";
-      goto fail;
-   }
-   {
-      unsigned i;
-      size_t len= strlen(str) + sizeof(char);
-      for (i= 1; i <= 10; ++i) {
-         char num[3];
-         if (sprintf(num, "%u", i) < 0) {
-            error= "Internal error!";
-            goto fail;
-         }
-         if (sfmtm(&str, &len, 'n', num, 0, "The number is %n.")) {
-            goto fmt_error;
-         }
-         if (puts(str) < 0) goto output_error;
-      }
-   }
+   if (puts(str) < 0) goto output_error;
    if (fflush(0)) goto output_error;
    cleanup:
    if (str) { free(str); str= 0; }
