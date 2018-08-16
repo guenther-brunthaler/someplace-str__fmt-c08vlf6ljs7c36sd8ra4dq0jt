@@ -10,22 +10,32 @@ struct isq {
    char const *expansion;
 };
 
-static char *sfmt_helper2(struct isq *fmt) {
+struct sfmt_vars {
+   struct isq *sq;
+   char **result;
+   int failure;
+   va_list *args;
+};
+
+static void sfmt_helper2(struct sfmt_vars *v) {
    char *buffer= 0;
-   const char *fstr= fmt->expansion, *insert;
+   const char *fstr= v->sq->expansion, *insert;
    size_t bsz= 0, used= 0, isz;
-   assert(!fmt->key);
+   assert(!v->sq->key);
    for (;;) {
       if (*fstr == '%') {
          struct isq *search;
          int key= *++fstr;
-         for (search= fmt->parent; ; search= search->parent) {
+         for (search= v->sq->parent; ; search= search->parent) {
             if (!search) {
-               free(buffer);
-               return
-                  (char *)"\0"
+               *v->result=
+                  (char *)
                   "Undefined insertion sequence referenced in format string!"
                ;
+               fail:
+               v->failure= 1;
+               free(buffer);
+               return;
             }
             if (search->key == key) break;
          }
@@ -42,26 +52,28 @@ static char *sfmt_helper2(struct isq *fmt) {
          if (!(nbuf= realloc(buffer, bsz))) {
             realloc_failure:
             free(buffer);
-            return (char *)"\0" "Memory allocation failure!";
+            *v->result= (char *)"Memory allocation failure!";
+            goto fail;
          }
          buffer= nbuf;
       }
       (void)memcpy(buffer + used, insert, isz); used+= isz;
       if (!*fstr) {
-         char *final;
-         if (!(final= realloc(buffer, used))) goto realloc_failure;
-         return final;
+         if (!(*v->result= realloc(buffer, used))) goto realloc_failure;
+         return;
       }
       ++fstr;
    }
 }
 
-static char *sfmt_helper(struct isq *sq, va_list *args) {
-   if (!sq->key) return sfmt_helper2(sq);
-   {
-      struct isq child= {sq, va_arg(*args, int)};
-      child.expansion= va_arg(*args, char const *);
-      return sfmt_helper(&child, args);
+static void sfmt_helper(struct sfmt_vars *v) {
+   if (v->sq->key) {
+      struct isq child= {v->sq, va_arg(*v->args, int)};
+      child.expansion= va_arg(*v->args, char const *);
+      v->sq= &child;
+      sfmt_helper(v);
+   } else {
+      sfmt_helper2(v);
    }
 }
 
@@ -88,29 +100,30 @@ static char *sfmt_helper(struct isq *sq, va_list *args) {
  * expansion can be defined to insert it (e. g. one with a key of '%' which
  * will insert "%").
  *
- * Return value: If the function returns non-zero then *<result> contains a
- * pointer to the successfully dynamically allocated string. It is the
- * responsibility of the caller to free() this string eventually.
+ * Return value: Returns 0 if successful.
  *
- * If the function returns 0, then the format operation has failed and
- * *<result> contains a read-only statically allocated error message which
- * must not be freed. */
+ * If successful, *<result> contains a pointer to the dynamically allocated
+ * formatted string. It is then the responsibility of the caller to free()
+ * this string eventually.
+ *
+ * On unsuccessful return, *<result> contains a read-only statically allocated
+ * error message which must not be freed. */
 static int sfmt(char **result, int key_1, const char *expansion_1, ...) {
    struct isq root= {0, key_1, expansion_1};
+   struct sfmt_vars v= {&root, result, 0};
    va_list args;
    va_start(args, expansion_1);
-   *result= sfmt_helper(&root, &args);
+   v.args= &args;
+   sfmt_helper(&v);
    va_end(args);
-   if (**result) return 1;
-   ++*result;
-   return 0;
+   return v.failure;
 }
 
 int main(void) {
    char *str;
    char const *error= 0;
    if (
-      !sfmt(
+      sfmt(
             &str
          ,  'Y', "2001", 'M', "12", 'D', "24", 'w', "Santa Claus", 'm'
          ,  "Ho Ho Ho", 0, "On %Y-%M-%D, %w said %m."
