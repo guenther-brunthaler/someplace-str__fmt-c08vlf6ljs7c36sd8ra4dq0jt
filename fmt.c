@@ -5,22 +5,24 @@
 #include <assert.h>
 
 struct isq {
-   struct isq *parent;
    int key;
    char const *expansion;
+   struct isq *parent;
 };
 
 struct sfmt_vars {
    struct isq *sq;
    char **result;
+   size_t *size;
+   int final;
    int failure;
    va_list *args;
 };
 
 static void sfmt_helper2(struct sfmt_vars *v) {
-   char *buffer= 0;
+   char *buffer= *v->result;
    const char *fstr= v->sq->expansion, *insert;
-   size_t bsz= 0, used= 0, isz;
+   size_t bsz= *v->size, used= 0, isz;
    assert(!v->sq->key);
    for (;;) {
       if (*fstr == '%') {
@@ -55,11 +57,15 @@ static void sfmt_helper2(struct sfmt_vars *v) {
             *v->result= (char *)"Memory allocation failure!";
             goto fail;
          }
-         buffer= nbuf;
+         buffer= nbuf; *v->size= bsz;
       }
       (void)memcpy(buffer + used, insert, isz); used+= isz;
       if (!*fstr) {
-         if (!(*v->result= realloc(buffer, used))) goto realloc_failure;
+         if (v->final) {
+            if (!(*v->result= realloc(buffer, used))) goto realloc_failure;
+         } else {
+            *v->result= buffer;
+         }
          return;
       }
       ++fstr;
@@ -68,7 +74,7 @@ static void sfmt_helper2(struct sfmt_vars *v) {
 
 static void sfmt_helper(struct sfmt_vars *v) {
    if (v->sq->key) {
-      struct isq child= {v->sq, va_arg(*v->args, int)};
+      struct isq child= {va_arg(*v->args, int), 0, v->sq};
       child.expansion= va_arg(*v->args, char const *);
       v->sq= &child;
       sfmt_helper(v);
@@ -109,8 +115,22 @@ static void sfmt_helper(struct sfmt_vars *v) {
  * On unsuccessful return, *<result> contains a read-only statically allocated
  * error message which must not be freed. */
 static int sfmt(char **result, int key_1, const char *expansion_1, ...) {
-   struct isq root= {0, key_1, expansion_1};
-   struct sfmt_vars v= {&root, result, 0};
+   struct isq root= {key_1, expansion_1};
+   size_t buffer_size= 0;
+   struct sfmt_vars v= {&root, result, &buffer_size, 1};
+   va_list args;
+   va_start(args, expansion_1);
+   v.args= &args;
+   sfmt_helper(&v);
+   va_end(args);
+   return v.failure;
+}
+
+static int sfmtm(
+   char **buffer_ref, size_t *size_ref, int key_1, const char *expansion_1, ...
+) {
+   struct isq root= {key_1, expansion_1};
+   struct sfmt_vars v= {&root, buffer_ref, size_ref};
    va_list args;
    va_start(args, expansion_1);
    v.args= &args;
@@ -129,15 +149,34 @@ int main(void) {
          ,  "Ho Ho Ho", 0, "On %Y-%M-%D, %w said %m."
       )
    ) {
+      fmt_error:
       error= str; str= 0;
       fail:
       (void)fputs(error, stderr);
       (void)fputc('\n', stderr);
       goto cleanup;
-   } else if (puts(str) < 0 || fflush(0)) {
+   }
+   if (puts(str) < 0) {
+      output_error:
       error= "output error!";
       goto fail;
    }
+   {
+      unsigned i;
+      size_t len= strlen(str) + sizeof(char);
+      for (i= 1; i <= 10; ++i) {
+         char num[3];
+         if (sprintf(num, "%u", i) < 0) {
+            error= "Internal error!";
+            goto fail;
+         }
+         if (sfmtm(&str, &len, 'n', num, 0, "The number is %n.")) {
+            goto fmt_error;
+         }
+         if (puts(str) < 0) goto output_error;
+      }
+   }
+   if (fflush(0)) goto output_error;
    cleanup:
    if (str) { free(str); str= 0; }
    return error ? EXIT_FAILURE : EXIT_SUCCESS;
