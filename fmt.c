@@ -101,7 +101,7 @@ static int sfmt(char **result, int key_1, const char *expansion_1, ...) {
    va_start(args, expansion_1);
    *result= sfmt_helper(&root, &args);
    va_end(args);
-   if (*result) return 1;
+   if (**result) return 1;
    ++*result;
    return 0;
 }
@@ -116,7 +116,7 @@ int main(void) {
          ,  "Ho Ho Ho", 0, "On %Y-%M-%D, %w said %m."
       )
    ) {
-      error= str;
+      error= str; str= 0;
       fail:
       (void)fputs(error, stderr);
       (void)fputc('\n', stderr);
