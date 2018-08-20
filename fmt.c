@@ -24,7 +24,7 @@ static void sfmt_helper2(struct sfmt_vars *v) {
    char *buffer= *v->result;
    const char *fstr= v->sq->expansion, *insert;
    size_t bsz= *v->size, used= 0, isz;
-   assert(!v->sq->key);
+   assert(!v->sq->key); assert(buffer ? bsz != 0 : bsz == 0);
    for (;;) {
       if (*fstr == '%') {
          struct isq *search;
@@ -36,8 +36,7 @@ static void sfmt_helper2(struct sfmt_vars *v) {
                   "Undefined insertion sequence referenced in format string!"
                ;
                fail:
-               v->failure= 1;
-               free(buffer);
+               free(buffer); *v->size= 0; v->failure= 1;
                return;
             }
             if (search->key == key) break;
@@ -54,7 +53,6 @@ static void sfmt_helper2(struct sfmt_vars *v) {
          while (used + isz >= bsz) bsz+= bsz;
          if (!(nbuf= realloc(buffer, bsz))) {
             realloc_failure:
-            free(buffer);
             *v->result= (char *)"Memory allocation failure!";
             goto fail;
          }
@@ -104,8 +102,8 @@ static void sfmt_helper(struct sfmt_vars *v) {
  * be used as a lookup key for finding the expansion string to insert.
  *
  * There is no built-in way to output a literal "%", but if required an
- * expansion can be defined to insert it (e. g. one with a key of '%' which
- * will insert "%").
+ * expansion can be defined to insert it (for example, one with a key of '%'
+ * which will insert the string "%").
  *
  * Return value: Returns 0 if successful.
  *
@@ -122,24 +120,30 @@ static int sfmt(char **result, int key_1, const char *expansion_1, ...) {
    va_list args;
    va_start(args, expansion_1);
    v.args= &args;
+   *result= 0;
    sfmt_helper(&v);
    va_end(args);
    return v.failure;
 }
 
 /* Same as sfmt() but intended for multiple invocations reusing the same
- * buffer. <buffer_ref> and <size_ref> are the variable which store the
- * current buffer pointer and buffer allocation size. They must contain valid
- * values, where a null pointer and a size size of zero are also valid,
- * meaning no buffer has been allocated yet. The buffer will be deallocated in
- * case of an error, using the pointer to specify the error message. The
- * buffer size variable has no meaning in this case. */
+ * buffer. <buffer_ref> and <size_ref> are the addresses of variables which
+ * store the current buffer pointer and buffer allocation size. Note that the
+ * allocation size is normally not the same as the size of the formatted
+ * result string and will rather be larger than that. The referenced variables
+ * must contain valid values. A null pointer and a size size of zero are also
+ * considered valid, meaning no buffer has been allocated yet. The buffer will
+ * be deallocated in case of an error, using the pointer to specify the error
+ * message. The variable referenced by <size_ref> will also be set to zero in
+ * that case. */
 static int sfmtm(
    char **buffer_ref, size_t *size_ref, int key_1, const char *expansion_1, ...
 ) {
    struct isq root= {key_1, expansion_1};
    struct sfmt_vars v= {&root, buffer_ref, size_ref};
    va_list args;
+   assert(buffer_ref); assert(size_ref);
+   assert(*buffer_ref ? *size_ref != 0 : *size_ref == 0);
    va_start(args, expansion_1);
    v.args= &args;
    sfmt_helper(&v);
@@ -162,7 +166,7 @@ int main(void) {
       unsigned i;
       size_t len= 0;
       for (i= 1; i <= 10; ++i) {
-         char num[UINT_BASE10_BUFSIZE(unsigned)];
+         char num[UINT_BASE10_BUFSIZE(i)];
          if (sprintf(num, "%u", i) < 0) {
             error= "Internal error!";
             fail:

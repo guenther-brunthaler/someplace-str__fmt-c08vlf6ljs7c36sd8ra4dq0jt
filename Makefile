@@ -7,7 +7,7 @@ all: $(TARGETS)
 clean:
 	-rm $(TARGETS)
 
-BUILD_CMD_PREFIX = $(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)
+CC_CMD_PREFIX = $(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS)
 
 .c:
-	$(BUILD_CMD_PREFIX) -o $@ $<
+	$(CC_CMD_PREFIX) -o $@ $<
