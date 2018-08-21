@@ -13,14 +13,19 @@ TARGETS = fmt
 all: $(TARGETS)
 
 clean:
-	-rm $(TARGETS)
+	-rm $(TARGETS) *.o
 
 CC_CMD_PREFIX = $(CC) $(CPPFLAGS) -I . $(CFLAGS) $(LDFLAGS)
 
-fmt_SOURCES = sfmt.c fmt.c
-fmt_HEADERS = \
+sfmt_HEADERS = \
 	decimal_buffer-j3skwtqur4kjdfmse06g3jjk5.h \
 	sfmt-8fhsyuxltzwiucx68ikkgkxzm.h
 
-fmt: $(sfmt_SOURCES) $(fmt_HEADERS)
-	$(CC_CMD_PREFIX) -o $@ $(fmt_SOURCES)
+sfmt.o: sfmt.c $(sfmt_HEADERS)
+	$(CC_CMD_PREFIX) -c sfmt.c
+
+fmt.o: fmt.c $(sfmt_HEADERS)
+	$(CC_CMD_PREFIX) -c fmt.c
+
+fmt: sfmt.o fmt.o
+	$(CC_CMD_PREFIX) -o $@ sfmt.o fmt.o
