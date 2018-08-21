@@ -11,6 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include <decimal_buffer-j3skwtqur4kjdfmse06g3jjk5.h>
 #include <stddef.h>
 
 /* Expand a simple format string containing string insertion sequences into a

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2018 Guenther Brunthaler. All rights reserved.
+ *
+ * This file is free software.
+ * Distribution is permitted under the terms of the LGPLv3.
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>

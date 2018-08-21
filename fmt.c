@@ -1,15 +1,6 @@
 #include <sfmt-8fhsyuxltzwiucx68ikkgkxzm.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
-
-#define UINT_BASE10_MAXCHARS(type_or_value) ( \
-   sizeof(type_or_value) * CHAR_BIT * 617 + 2047 >> 11 \
-)
-
-#define UINT_BASE10_BUFSIZE(type_or_value) ( \
-   UINT_BASE10_MAXCHARS(type_or_value) + 1 \
-)
 
 int main(void) {
    char *str= 0;
