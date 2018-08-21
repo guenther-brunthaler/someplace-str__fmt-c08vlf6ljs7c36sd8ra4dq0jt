@@ -1,8 +1,12 @@
-TARGETS = fmt
+# POSIX-compliant Makefile.
 
+# Maximum POSIX-defined C compiler flags for optimized builds. Override those
+# from the "make" command line with MACRO=value as required.
 CPPFLAGS = -D NDEBUG
 CFLAGS = -O
 LDFLAGS = -s
+
+TARGETS = fmt
 
 .PHONY: all clean
 
@@ -12,9 +16,6 @@ clean:
 	-rm $(TARGETS)
 
 CC_CMD_PREFIX = $(CC) $(CPPFLAGS) -I . $(CFLAGS) $(LDFLAGS)
-
-.c:
-	$(CC_CMD_PREFIX) -o $@ $<
 
 fmt_SOURCES = sfmt.c fmt.c
 fmt_HEADERS = \
