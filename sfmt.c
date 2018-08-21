@@ -20,7 +20,7 @@ struct sfmt_vars {
    struct isq *sq;
    char **result;
    size_t *size;
-   va_list *args;
+   va_list args;
 };
 
 static void sfmt_helper2(struct sfmt_vars *v) {
@@ -71,8 +71,8 @@ static void sfmt_helper2(struct sfmt_vars *v) {
 
 static void sfmt_helper(struct sfmt_vars *v) {
    if (v->sq->key) {
-      struct isq child= {va_arg(*v->args, int), 0, v->sq};
-      child.expansion= va_arg(*v->args, char const *);
+      struct isq child= {va_arg(v->args, int), 0, v->sq};
+      child.expansion= va_arg(v->args, char const *);
       v->sq= &child;
       sfmt_helper(v);
    } else {
@@ -86,12 +86,10 @@ int sfmt(
 ) {
    struct isq root= {key_1, expansion_1};
    struct sfmt_vars v= {&root, buffer_ref, buffer_size_ref};
-   va_list args;
    assert(buffer_ref); assert(buffer_size_ref);
    assert(*buffer_ref ? *buffer_size_ref != 0 : *buffer_size_ref == 0);
-   va_start(args, expansion_1);
-   v.args= &args;
+   va_start(v.args, expansion_1);
    sfmt_helper(&v);
-   va_end(args);
+   va_end(v.args);
    return !*buffer_size_ref && *buffer_ref;
 }
