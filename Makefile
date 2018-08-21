@@ -1,5 +1,9 @@
 TARGETS = fmt
 
+CPPFLAGS = -D NDEBUG
+CFLAGS = -O
+LDFLAGS = -s
+
 .PHONY: all clean
 
 all: $(TARGETS)
