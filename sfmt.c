@@ -71,8 +71,10 @@ static void sfmt_helper2(struct sfmt_vars *v) {
 
 static void sfmt_helper(struct sfmt_vars *v) {
    if (v->sq->key) {
-      struct isq child= {va_arg(v->args, int), 0, v->sq};
+      struct isq child;
+      child.key= va_arg(v->args, int);
       child.expansion= va_arg(v->args, char const *);
+      child.parent= v->sq;
       v->sq= &child;
       sfmt_helper(v);
    } else {
