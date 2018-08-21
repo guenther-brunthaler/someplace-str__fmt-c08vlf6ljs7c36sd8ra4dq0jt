@@ -1,4 +1,5 @@
-# POSIX-compliant Makefile.
+# Enable POSIX-compliant Makefile processing.
+.POSIX:
 
 # Maximum POSIX-defined C compiler flags for optimized builds. Override those
 # from the "make" command line with MACRO=value as required.
