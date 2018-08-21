@@ -20,7 +20,6 @@ struct sfmt_vars {
    struct isq *sq;
    char **result;
    size_t *size;
-   int failure;
    va_list *args;
 };
 
@@ -40,7 +39,7 @@ static void sfmt_helper2(struct sfmt_vars *v) {
                   "Undefined insertion sequence referenced in format string!"
                ;
                fail:
-               free(buffer); *v->size= 0; v->failure= 1;
+               free(buffer); *v->size= 0;
                return;
             }
             if (search->key == key) break;
@@ -94,5 +93,5 @@ int sfmt(
    v.args= &args;
    sfmt_helper(&v);
    va_end(args);
-   return v.failure;
+   return !*buffer_size_ref && *buffer_ref;
 }
