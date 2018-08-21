@@ -10,7 +10,8 @@
 #define HEADER_J3SKWTQUR4KJDFMSE06G3JJK5_INCLUDED
 #include <limits.h>
 
-/* # of decimal digits in a format buffer, NOT including a null terminator. */
+/* Maximum # of decimal digits required for writing an arbitrary value of
+ * the given type into a format buffer, NOT including a null terminator. */
 #define UINT_BASE10_MAXCHARS(type_or_value) ( \
    sizeof(type_or_value) * CHAR_BIT * 617 + 2047 >> 11 \
 )
@@ -18,8 +19,8 @@
    1 + UINT_BASE10_MAXCHARS(type_or_value) \
 )
 
-/* # of maximum bytes required for a format buffer, including null the
- * terminator. */
+/* Maximum # of bytes required for a format buffer capable of storing an
+ * arbitrary value of the given type, including a null terminator. */
 #define UINT_BASE10_BUFSIZE(type_or_value) ( \
    UINT_BASE10_MAXCHARS(type_or_value) + 1 \
 )
