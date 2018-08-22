@@ -19,14 +19,14 @@ clean:
 C = $(CC) $(CPPFLAGS) -I . $(CFLAGS) -c
 L = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 
-sfmt_HEADERS = \
+sfmt_H = \
 	decimal_buffer-j3skwtqur4kjdfmse06g3jjk5.h \
 	sfmt-8fhsyuxltzwiucx68ikkgkxzm.h
 
-sfmt.o: sfmt.c $(sfmt_HEADERS)
+sfmt.o: sfmt.c $(sfmt_H)
 	$C sfmt.c
 
-fmt.o: fmt.c $(sfmt_HEADERS)
+fmt.o: fmt.c $(sfmt_H)
 	$C fmt.c
 
 fmt: sfmt.o fmt.o
