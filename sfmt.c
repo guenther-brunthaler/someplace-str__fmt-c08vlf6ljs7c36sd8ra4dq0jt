@@ -38,9 +38,7 @@ static void sfmt_helper2(struct sfmt_vars *v) {
                   (char *)
                   "Undefined insertion sequence referenced in format string!"
                ;
-               fail:
-               free(buffer); *v->size= 0;
-               return;
+               goto fail;
             }
             if (search->key == key) break;
          }
@@ -56,14 +54,16 @@ static void sfmt_helper2(struct sfmt_vars *v) {
          while (used + isz >= bsz) bsz+= bsz;
          if (!(nbuf= realloc(buffer, bsz))) {
             *v->result= (char *)"Memory allocation failure!";
-            goto fail;
+            fail:
+            free(buffer); *v->size= 0;
+            break;
          }
          buffer= nbuf; *v->size= bsz;
       }
       (void)memcpy(buffer + used, insert, isz); used+= isz;
       if (!*fstr) {
          *v->result= buffer;
-         return;
+         break;
       }
       ++fstr;
    }
