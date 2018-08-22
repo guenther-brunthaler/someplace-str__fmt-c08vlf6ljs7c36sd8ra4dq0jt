@@ -19,8 +19,8 @@ clean:
 .c.o:
 	$(CC) $(CPPFLAGS) -I . $(CFLAGS) -c $<
 
-.DEFAULT:
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
+.o:
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $?
 
 sfmt.o fmt.o: \
 	decimal_buffer-j3skwtqur4kjdfmse06g3jjk5.h \
