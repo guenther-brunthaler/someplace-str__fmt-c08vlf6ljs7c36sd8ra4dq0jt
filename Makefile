@@ -16,18 +16,18 @@ all: $(TARGETS)
 clean:
 	-rm $(TARGETS) *.o
 
-COMPILE = $(CC) $(CPPFLAGS) -I . $(CFLAGS) -c
-LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+C = $(CC) $(CPPFLAGS) -I . $(CFLAGS) -c
+L = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 
 sfmt_HEADERS = \
 	decimal_buffer-j3skwtqur4kjdfmse06g3jjk5.h \
 	sfmt-8fhsyuxltzwiucx68ikkgkxzm.h
 
 sfmt.o: sfmt.c $(sfmt_HEADERS)
-	$(COMPILE) sfmt.c
+	$C sfmt.c
 
 fmt.o: fmt.c $(sfmt_HEADERS)
-	$(COMPILE) fmt.c
+	$C fmt.c
 
 fmt: sfmt.o fmt.o
-	$(LINK) sfmt.o fmt.o
+	$L sfmt.o fmt.o
