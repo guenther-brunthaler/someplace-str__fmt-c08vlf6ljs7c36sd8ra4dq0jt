@@ -17,7 +17,7 @@ struct isq {
 };
 
 struct sfmt_vars {
-   struct isq *sq;
+   struct isq *head;
    char **result;
    size_t *size;
    va_list args;
@@ -25,14 +25,14 @@ struct sfmt_vars {
 
 static void sfmt_helper2(struct sfmt_vars *v) {
    char *buffer= *v->result;
-   const char *fstr= v->sq->expansion, *insert;
+   const char *fstr= v->head->expansion, *insert;
    size_t bsz= *v->size, used= 0, isz;
-   assert(!v->sq->key); assert(buffer ? bsz != 0 : bsz == 0);
+   assert(!v->head->key); assert(buffer ? bsz != 0 : bsz == 0);
    for (;;) {
       if (*fstr == '%') {
          struct isq *search;
          int key= *++fstr;
-         for (search= v->sq->parent; ; search= search->parent) {
+         for (search= v->head->parent; ; search= search->parent) {
             if (!search) {
                *v->result=
                   (char *)
@@ -70,12 +70,12 @@ static void sfmt_helper2(struct sfmt_vars *v) {
 }
 
 static void sfmt_helper(struct sfmt_vars *v) {
-   if (v->sq->key) {
+   if (v->head->key) {
       struct isq child;
       child.key= va_arg(v->args, int);
       child.expansion= va_arg(v->args, char const *);
-      child.parent= v->sq;
-      v->sq= &child;
+      child.parent= v->head;
+      v->head= &child;
       sfmt_helper(v);
    } else {
       sfmt_helper2(v);
