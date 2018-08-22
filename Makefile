@@ -1,13 +1,13 @@
-# Enable POSIX-compliant Makefile processing.
-.POSIX:
-
-# Maximum POSIX-defined C compiler flags for optimized builds. Override those
-# from the "make" command line with MACRO=value as required.
+# Default to maximum POSIX-supported C compiler flags for optimized builds.
+# Override those from the "make" command line with MACRO=value as desired.
 CPPFLAGS = -D NDEBUG
 CFLAGS = -O
 LDFLAGS = -s
 
 TARGETS = fmt
+
+# Enable POSIX-compliant Makefile processing. Must be the very first rule.
+.POSIX:
 
 .PHONY: all clean
 
