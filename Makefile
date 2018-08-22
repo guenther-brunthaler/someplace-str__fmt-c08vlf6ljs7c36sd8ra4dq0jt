@@ -4,17 +4,17 @@ CPPFLAGS = -D NDEBUG
 CFLAGS = -O
 LDFLAGS = -s
 
-TARGETS = fmt
-
 # Enable POSIX-compliant Makefile processing. Must be the very first rule.
 .POSIX:
 
 .PHONY: all clean
 
+include autodetected-targets.mk
+
 all: $(TARGETS)
 
 clean:
-	-rm $(TARGETS) *.o
+	-rm $(TARGETS) $(OBJECTS)
 
 .c.o:
 	$(CC) $(CPPFLAGS) -I . $(CFLAGS) -c $<
@@ -22,8 +22,4 @@ clean:
 .o:
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $?
 
-sfmt.o fmt.o: \
-	decimal_buffer-j3skwtqur4kjdfmse06g3jjk5.h \
-	sfmt-8fhsyuxltzwiucx68ikkgkxzm.h
-
-fmt: sfmt.o fmt.o
+include autodetected-rules.mk
