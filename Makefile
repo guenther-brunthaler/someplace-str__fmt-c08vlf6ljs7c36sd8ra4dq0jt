@@ -20,9 +20,9 @@ clean:
 	-rm $(TARGETS) $(OBJECTS)
 
 .c.o:
-	$(CC) $(CPPFLAGS) -I . $(CFLAGS) -c $<
+	$(CC) $(CPPFLAGS) $(INCLUDES) $(CFLAGS) -c $<
 
 .o:
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $?
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(LIBS) $?
 
 include autodetected-rules.mk
