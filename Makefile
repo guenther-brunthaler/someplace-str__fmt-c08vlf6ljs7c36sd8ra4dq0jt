@@ -1,3 +1,6 @@
+# This Makefile was originally a copy of Makefile.tpl as provided by
+# Makefile-autogenerator version 2018.234.2.
+
 # Default to maximum POSIX-supported C compiler flags for optimized builds.
 # Override those from the "make" command line with MACRO=value as desired.
 CPPFLAGS = -D NDEBUG
@@ -9,7 +12,7 @@ LDFLAGS = -s
 
 .PHONY: all clean
 
-include autodetected-targets.mk
+include autodetected-macros.mk
 
 all: $(TARGETS)
 
