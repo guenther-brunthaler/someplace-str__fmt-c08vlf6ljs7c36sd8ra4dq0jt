@@ -2,6 +2,6 @@ TARGETS = fmt
 
 OBJECTS = fmt.o sfmt.o
 
-INCLUDES = -I .
+AUTODETECTED_INCDIRS = -I .
 
-LIBS =
+AUTODETECTED_LIBS =

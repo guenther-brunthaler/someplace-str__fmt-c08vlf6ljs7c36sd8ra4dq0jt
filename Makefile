@@ -6,6 +6,8 @@
 CPPFLAGS = -D NDEBUG
 CFLAGS = -O
 LDFLAGS = -s
+INCDIRS = $(AUTODETECTED_INCDIRS)
+LIBS = $(AUTODETECTED_LIBS)
 
 # Enable POSIX-compliant Makefile processing. Must be the very first rule.
 .POSIX:
@@ -20,7 +22,7 @@ clean:
 	-rm $(TARGETS) $(OBJECTS)
 
 .c.o:
-	$(CC) $(CPPFLAGS) $(INCLUDES) $(CFLAGS) -c $<
+	$(CC) $(CPPFLAGS) $(INCDIRS) $(CFLAGS) -c $<
 
 .o:
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(LIBS) $?
