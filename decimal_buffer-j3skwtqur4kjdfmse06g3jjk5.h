@@ -1,10 +1,10 @@
 /* #include <decimal_buffer-j3skwtqur4kjdfmse06g3jjk5.h>
  *
+ * Version 2018.240
  * Copyright (c) 2018 Guenther Brunthaler. All rights reserved.
  *
- * This header file and its associated implementations are free software.
- * Distribution is permitted under the terms of the LGPLv3.
- */
+ * This header file is free software.
+ * Distribution is permitted under the terms of the LGPLv3. */
 
 #ifndef HEADER_J3SKWTQUR4KJDFMSE06G3JJK5_INCLUDED
 #define HEADER_J3SKWTQUR4KJDFMSE06G3JJK5_INCLUDED
