@@ -1,4 +1,4 @@
-/* Version 2018.240
+/* Version 2018.250
  * Copyright (c) 2018 Guenther Brunthaler. All rights reserved.
  *
  * This source file is free software.
@@ -44,13 +44,16 @@ static void sfmt_helper2(struct sfmt_vars *v) {
          assert(search);
          assert(*fstr);
          isz= strlen(insert= search->expansion);
+      } else if (used < bsz) {
+         buffer[used++]= *fstr;
+         goto copied;
       } else {
          insert= fstr; isz= 1;
       }
       if (used + isz >= bsz) {
-         char *nbuf;
+         void *nbuf;
          if (!bsz) bsz= 80;
-         while (used + isz >= bsz) bsz+= bsz;
+         while (used + isz > bsz) bsz+= bsz;
          if (!(nbuf= realloc(buffer, bsz))) {
             *v->result= (char *)"Memory allocation failure!";
             fail:
@@ -60,6 +63,7 @@ static void sfmt_helper2(struct sfmt_vars *v) {
          buffer= nbuf; *v->size= bsz;
       }
       (void)memcpy(buffer + used, insert, isz); used+= isz;
+      copied:
       if (!*fstr) {
          *v->result= buffer;
          break;
