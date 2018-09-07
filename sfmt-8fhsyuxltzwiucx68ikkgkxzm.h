@@ -12,13 +12,14 @@
    extern "C" {
 #endif
 #include <decimal_buffer-j3skwtqur4kjdfmse06g3jjk5.h>
-#include <stddef.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 /* Expand a simple format string containing string insertion sequences into a
- * dynamically alloated buffer.
+ * dynamically allocated buffer.
  *
- * <key_1> and <expansion_1> are the first of char+string argument-pairs which
- * define all available insertion sequences as well as the format string.
+ * The variable arguments consist of one or more (int key, const char
+ * *expansion)-pairs.
  *
  * Insertion sequences come first in arbitrary order and define a "char" key
  * and an expansion string associated with that key. It the same key occurs
@@ -27,7 +28,7 @@
  * referenced from within the format string are allowed and will have no
  * effect.
  *
- * A key of 0 is special and its associated insertion string then actually
+ * A key of 0 is special and its associated expansion string then actually
  * represents the format string. The format string is usually also the last
  * argument, because any additional arguments will be ignored.
  *
@@ -60,7 +61,8 @@
  * considered valid, meaning no buffer has been allocated yet. This is also
  * the recommended way to initialize those variables.
  *
- * Return value: Returns 0 if successful.
+ * Return value: Returns 0 if successful. Alternatively, checking whether
+ * *<buffer_size_ref> is non-zero will also determine success.
  *
  * If successful, *<buffer_ref> contains a pointer to the dynamically
  * allocated (or re-allocated) null-terminated formatted string.
@@ -71,10 +73,29 @@
  * *<buffer_size_ref> will be set to zero. Then *<buffer_ref> will be replaced
  * by a pointer to a read-only statically allocated error message which must
  * not be freed. */
-int sfmt(
-      char **buffer_ref, size_t *buffer_size_ref
-   ,  int key_1, const char *expansion_1, ...
+int sfmt(char **buffer_ref, size_t *buffer_size_ref, ...);
+
+/* Same a sfmt() but takes the variable arguments as a va_list instead of
+ * directly. Success is indicated by a non-zero *buffer_size_ref. */
+void vsfmt(char **buffer_ref, size_t *buffer_size_ref, va_list args);
+
+/* Calls sfmt() and prints the resulting string to stream <out> if successful,
+ * or prints the error message to standard error if unsuccessful. It is still
+ * the responsibility of the caller to free the buffer eventually in the
+ * successful case. */
+int pfmtm(char **buffer_ref, size_t *buffer_size_ref, FILE *out, ...);
+
+/* Same a pfmtm() but takes the variable arguments as a va_list instead of
+ * directly. Success is indicated by a non-zero *buffer_size_ref. */
+void vpfmtm(
+   char **buffer_ref, size_t *buffer_size_ref, FILE *out, va_list args
 );
+
+/* Calls pfmtm() and handle buffer allocation and deallocation internally. The
+   return code still indicates whether the format operation has been
+   successful. This function is less efficient than pfmtm() when called within
+   a loop, because the buffer cannot be shared between calls. */
+int pfmt(FILE *out, ...);
 
 #ifdef __cplusplus
    }
